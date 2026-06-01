@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -32,6 +34,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    /**
+     * @var Collection<int, Ticket>
+     */
+    #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'creator')]
+    private Collection $createdTickets;
+
+    public function __construct()
+    {
+        $this->createdTickets = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -112,5 +125,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void
     {
         // @deprecated, to be removed when upgrading to Symfony 8
+    }
+
+    /**
+     * @return Collection<int, Ticket>
+     */
+    public function getCreatedTickets(): Collection
+    {
+        return $this->createdTickets;
+    }
+
+    public function addCreatedTicket(Ticket $createdTicket): static
+    {
+        if (!$this->createdTickets->contains($createdTicket)) {
+            $this->createdTickets->add($createdTicket);
+            $createdTicket->setCreator($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCreatedTicket(Ticket $createdTicket): static
+    {
+        if ($this->createdTickets->removeElement($createdTicket)) {
+            // set the owning side to null (unless already changed)
+            if ($createdTicket->getCreator() === $this) {
+                $createdTicket->setCreator(null);
+            }
+        }
+
+        return $this;
     }
 }
