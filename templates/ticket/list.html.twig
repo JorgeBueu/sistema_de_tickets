@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}List Tickets
+{% endblock %}
+
+{% block body %}
+	<style>
+		table {
+			border-collapse: collapse;
+		}
+		th,
+		td {
+			border: 1px solid black;
+			padding: 8px;
+		}
+		th {
+			background-color: #f2f2f2;
+		}
+	</style>
+
+	<div class="example-wrapper">
+		<h1>Mis Tickets</h1>
+
+		<table>
+			<tr>
+				<th>Id</th>
+				<th>Título</th>
+				<th>Descripción</th>
+				<th>Fecha creación</th>
+			</tr>
+			{% for ticket in tickets %}
+				<tr>
+					<td>{{ticket.id}}
+					</td>
+					<td>{{ticket.title}}
+					</td>
+					<td>{{ticket.description}}
+					</td>
+					<td>{{ticket.createdAt|date()}}
+					</td>
+				</tr>
+			{% endfor %}
+		</table>
+	</div>
+{% endblock %}
