@@ -1,19 +1,33 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Registro
+{% endblock %}
 
 {% block body %}
-    <h1>Register</h1>
+	<h1>Registrarse</h1>
 
-    {{ form_errors(registrationForm) }}
+	{{ form_start(registrationForm, {'attr': {'class': 'needs-validation'}}) }}
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+	<div class="mb-3">
+		{{ form_label(registrationForm.email) }}
+		{{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+		{{ form_errors(registrationForm.email) }}
+	</div>
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+	<div class="mb-3">
+		{{ form_label(registrationForm.plainPassword, 'Contraseña') }}
+		{{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control'}}) }}
+		{{ form_errors(registrationForm.plainPassword) }}
+	</div>
+
+	<div class="form-check mb-3">
+		{{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
+		{{ form_label(registrationForm.agreeTerms, 'Aceptar términos y condiciones', {'label_attr': {'class': 'form-check-label'}}) }}
+		{{ form_errors(registrationForm.agreeTerms) }}
+	</div>
+
+	<button type="submit" class="btn btn-success">Registrarse</button>
+	<a class="btn btn-primary" href="{{ path('app_login') }}">Iniciar sesión</a>
+
+	{{ form_end(registrationForm) }}
 {% endblock %}

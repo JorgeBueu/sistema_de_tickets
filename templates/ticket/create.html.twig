@@ -1,18 +1,27 @@
-{% extends 'base.html.twig' %}
+{% extends 'baseTicket.html.twig' %}
 
-{% block title %}Create Ticket{% endblock %}
+{% block title %}Crear Ticket{% endblock %}
 
 {% block body %}
-    <h1>Create a new ticket</h1>
+    <h1>Crear nuevo ticket</h1>
 
-    {{ form_errors(ticketForm) }}
+    {{ form_start(ticketForm, {'attr': {'class': 'needs-validation'}}) }}
 
-    {{ form_start(ticketForm) }}
-    
-        {{ form_row(ticketForm.title) }}
-        {{ form_row(ticketForm.description) }}
+	<div class="mb-3">
+		{{ form_label(ticketForm.title, 'Título') }}
+		{{ form_widget(ticketForm.title, {'attr': {'class': 'form-control'}}) }}
+		{{ form_errors(ticketForm.title) }}
+	</div>
 
-        <button type="submit" class="btn">Create</button>
+	<div class="mb-3">
+		{{ form_label(ticketForm.description, 'Descripción') }}
+		{{ form_widget(ticketForm.description, {'attr': {'class': 'form-control'}}) }}
+		{{ form_errors(ticketForm.description) }}
+	</div>
 
-    {{ form_end(ticketForm) }}
+	<button type="submit" class="btn btn-success">Crear</button>
+	<a class="btn btn-danger" href="{{ path('app_ticket_list') }}">Cancelar</a>
+
+	{{ form_end(ticketForm) }}
+
 {% endblock %}

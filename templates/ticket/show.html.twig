@@ -1,18 +1,27 @@
-{% extends 'base.html.twig' %}
+{% extends 'baseTicket.html.twig' %}
 
 {% block title %}Show Ticket
 {% endblock %}
 
 {% block body %}
+	<table class="table table-striped table-bordered">
+		<tr>
+			<th>Título</th>
+			<td>{{ticket.title}}</td>
+		</tr>
+		<tr>
+			<th>Descripción</th>
+			<td>{{ticket.description}}</td>
+		</tr>
+		<tr>
+			<th>Fecha creación</th>
+			<td>{{ticket.createdAt|date()}}</td>
+		</tr>
+		<tr>
+			<th>Creador</th>
+			<td>{{ticket.creator.email}}</td>
+		</tr>
+	</table>
 
-	<div class="example-wrapper">
-		<h1>Ticket: {{ticket.title}}</h1>
-
-		<p><strong>Descripción:</strong> {{ticket.description}}
-		</p>
-		<p><strong>Fecha de creación:</strong> {{ticket.createdAt|date()}}
-		</p>
-        <p><strong>Creador:</strong> {{ticket.creator.email}}
-		</p>
-	</div>
+	<a class="btn btn-primary" href="{{ path('app_ticket_list') }}">Volver</a>
 {% endblock %}
