@@ -6,6 +6,7 @@ use App\Entity\Ticket;
 use App\Form\TicketType;
 use App\Repository\TicketRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,16 +22,22 @@ final class TicketController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                // asignamos como creador el usuario actualmente logueado
+                $ticket->setCreator($this->getUser());
+                // $this->getUser() saca del token de seguridad actual el usuario que ha hecho login.
 
-            // asignamos como creador el usuario actualmente logueado
-            $ticket->setCreator($this->getUser());
-            // $this->getUser() saca del token de seguridad actual el usuario que ha hecho login.
+                $entityManager->persist($ticket);
+                $entityManager->flush();
 
-            $entityManager->persist($ticket);
-            $entityManager->flush();
+                // Mensaje flash de éxito
+                $this->addFlash('success', 'Ticket creado con éxito');
 
-            // do anything else you need here, like send an email
-            return $this->redirectToRoute('app_ticket_list');
+                // do anything else you need here, like send an email
+                return $this->redirectToRoute('app_ticket_list');
+            } catch (Exception $e) {
+                $this->addFlash('danger', 'No se pudo crear el ticket');
+            }
         }
 
         return $this->render('ticket/create.html.twig', [
@@ -57,7 +64,7 @@ final class TicketController extends AbstractController
         // Hacemos una consulta por id, pero
         // Los ID de los tickets son GLOBALES
         $ticket = $ticketRepo->find($id);
-        
+
         // Por lo que hay que comprobar si en el ticket de la consulta
         // Coinciden creador y usuario logueado que lo consulta
         if ($ticket->getCreator() !== $this->getUser()) {

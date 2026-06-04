@@ -4,6 +4,9 @@
 {% endblock %}
 
 {% block body %}
+
+	<h1>Información del ticket</h1>
+
 	<table class="table table-striped table-bordered">
 		<tr>
 			<th>Título</th>
@@ -15,7 +18,7 @@
 		</tr>
 		<tr>
 			<th>Fecha creación</th>
-			<td>{{ticket.createdAt|date()}}</td>
+			<td>{{ticket.createdAt|date('d/m/Y H:i', 'Europe/Madrid')}}</td>
 		</tr>
 		<tr>
 			<th>Creador</th>
