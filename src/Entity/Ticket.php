@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use App\Repository\TicketRepository;
 use DateTimeImmutable;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TicketRepository::class)]
 class Ticket
@@ -14,14 +16,32 @@ class Ticket
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(
+        message: 'Debe introducir un título.'
+    )]
+    #[Assert\Length(
+        min: 2,
+        max: 50,
+        minMessage: 'El título debe tener al menos {{ limit }} caracteres',
+        maxMessage: 'El título no debe tener mas de {{ limit }} carácteres'
+    )]
     private ?string $title = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(
+        message: 'Debe introducir una descripción.'
+    )]
+    #[Assert\Length(
+        min: 2,
+        max: 2000,
+        minMessage: 'La descripción debe tener al menos {{ limit }} caracteres',
+        maxMessage: 'La descripción no debe tener mas de {{ limit }} carácteres'
+    )]
     private ?string $description = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'createdTickets')]
     #[ORM\JoinColumn(nullable: false)]
@@ -45,7 +65,8 @@ class Ticket
 
     public function setTitle(string $title): static
     {
-        $this->title = $title;
+        // Hago un trim en el set por que no quiero que el usuario introduzca espacios al principio o al final.
+        $this->title = trim($title);
 
         return $this;
     }
@@ -57,7 +78,7 @@ class Ticket
 
     public function setDescription(string $description): static
     {
-        $this->description = $description;
+        $this->description = trim($description);
 
         return $this;
     }
@@ -65,13 +86,6 @@ class Ticket
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
     }
 
     public function getCreator(): ?User

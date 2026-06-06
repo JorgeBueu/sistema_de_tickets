@@ -5,7 +5,8 @@
 {% block body %}
     <h1>Crear nuevo ticket</h1>
 
-    {{ form_start(ticketForm, {'attr': {'class': 'needs-validation'}}) }}
+	<!-- Con esto quitamos la validacion html para dejar solo la de symfony -->
+    {{ form_start(ticketForm, {attr: {novalidate: 'novalidate'}}) }}
 
 	<div class="mb-3">
 		{{ form_label(ticketForm.title, 'Título') }}
