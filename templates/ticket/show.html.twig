@@ -27,4 +27,6 @@
 	</table>
 
 	<a class="btn btn-primary" href="{{ path('app_ticket_list') }}">Volver</a>
+	<a class="btn btn-warning" href="{{ path('app_ticket_id_edit', {'id': ticket.id}) }}">Editar</a>
+	<a class="btn btn-danger" href="{{ path('app_ticket_id_delete', {'id': ticket.id}) }}" onclick="return confirm('¿Estás seguro de que quieres borrar este ticket?');">Borrar</a>
 {% endblock %}

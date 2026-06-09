@@ -43,7 +43,6 @@ final class TicketController extends AbstractController
         return $this->render('ticket/create.html.twig', [
             'ticketForm' => $form->createView(),
         ]);
-
     }
 
     #[Route('/ticket/list', name: 'app_ticket_list')]
@@ -65,6 +64,10 @@ final class TicketController extends AbstractController
         // Los ID de los tickets son GLOBALES
         $ticket = $ticketRepo->find($id);
 
+        if (!$ticket) {
+            throw $this->createNotFoundException();
+        }
+
         // Por lo que hay que comprobar si en el ticket de la consulta
         // Coinciden creador y usuario logueado que lo consulta
         if ($ticket->getCreator() !== $this->getUser()) {
@@ -75,5 +78,73 @@ final class TicketController extends AbstractController
         return $this->render('ticket/show.html.twig', [
             'ticket' => $ticket
         ]);
+    }
+
+    #[Route('/ticket/{id}/edit', name: 'app_ticket_id_edit')]
+    public function edit(TicketRepository $ticketRepo, int $id, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        // Comprobamos si el id del ticket es del usuario con sesion iniciada
+        $ticket = $ticketRepo->find($id);
+        if (!$ticket) {
+            throw $this->createNotFoundException();
+        }
+        if ($ticket->getCreator() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        // Al crear el form con el objeto ticket rellena los campos con sus datos
+        $form = $this->createForm(TicketType::class, $ticket);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                $entityManager->flush();
+
+                // Mensaje flash de éxito
+                $this->addFlash('success', 'Ticket actualizado con éxito');
+                return $this->redirectToRoute('app_ticket_list');
+            } catch (Exception $e) {
+                $this->addFlash('danger', 'No se pudo actualizar el ticket');
+            }
+        }
+
+        return $this->render('ticket/edit.html.twig', [
+            'ticketForm' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/ticket/{id}/delete', name: 'app_ticket_id_delete', methods: ['POST'])]
+    public function delete(Request $request, TicketRepository $ticketRepo, int $id, EntityManagerInterface $entityManager): Response
+    {
+        // Comprobamos si el id del ticket es del usuario con sesion iniciada
+        $ticket = $ticketRepo->find($id);
+        // Comprobamos si la consulta devuelve algun ticket
+        if (!$ticket) {
+            throw $this->createNotFoundException();
+        }
+        // Comprobamos que id sea propiedad del usuario con sesion iniciada
+        if ($ticket->getCreator() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+        /* Comprobamos que el token CSRF enviado por el formulario es válido.
+        Esto evita ataques donde otra web intenta enviar peticiones POST
+        aprovechando que el usuario tiene una sesión iniciada. */
+        if (!$this->isCsrfTokenValid(
+            'delete' . $ticket->getId(),
+            $request->request->get('_token')
+        )) {
+            throw $this->createAccessDeniedException();
+        }
+
+        try {
+            $entityManager->remove($ticket);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Ticket eliminado con éxito');
+        } catch (Exception $e) {
+            $this->addFlash('danger', 'No se pudo eliminar el ticket');
+        }
+        // Redirigir después de borrar
+        return $this->redirectToRoute('app_ticket_list');
     }
 }

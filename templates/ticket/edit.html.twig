@@ -1,0 +1,28 @@
+{% extends 'baseTicket.html.twig' %}
+
+{% block title %}Editar Ticket{% endblock %}
+
+{% block body %}
+    <h1>Editar ticket</h1>
+
+	<!-- Con esto quitamos la validacion html para dejar solo la de symfony -->
+    {{ form_start(ticketForm, {attr: {novalidate: 'novalidate'}}) }}
+
+	<div class="mb-3">
+		{{ form_label(ticketForm.title, 'Título') }}
+		{{ form_widget(ticketForm.title, {'attr': {'class': 'form-control'}}) }}
+		{{ form_errors(ticketForm.title) }}
+	</div>
+
+	<div class="mb-3">
+		{{ form_label(ticketForm.description, 'Descripción') }}
+		{{ form_widget(ticketForm.description, {'attr': {'class': 'form-control'}}) }}
+		{{ form_errors(ticketForm.description) }}
+	</div>
+
+	<button type="submit" class="btn btn-success">Actualizar</button>
+	<a class="btn btn-danger" href="{{ path('app_ticket_list') }}">Cancelar</a>
+
+	{{ form_end(ticketForm) }}
+
+{% endblock %}

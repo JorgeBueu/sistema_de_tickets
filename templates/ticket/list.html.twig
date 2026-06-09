@@ -30,8 +30,18 @@
 							</td>
 							<td>
 								<a class="btn btn-sm btn-primary" href="{{ path('app_ticket_id', {'id': ticket.id}) }}">Ver</a>
-								<a class="btn btn-sm btn-warning" href="#">Editar</a>
-								<a class="btn btn-sm btn-danger" href="#">Borrar</a>
+								<a class="btn btn-sm btn-warning" href="{{ path('app_ticket_id_edit', {'id': ticket.id}) }}">Editar</a>
+								<form
+									method="post" action="{{ path('app_ticket_id_delete', {'id': ticket.id}) }}" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que quieres borrar este ticket?');">
+									<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ticket.id) }}">
+									{#
+									    Token CSRF.
+									    Symfony genera un token único para esta operación de borrado.
+									    Así evitamos que otras webs puedan enviar peticiones POST
+									    haciéndose pasar por el usuario autenticado.
+									#}
+									<button type="submit" class="btn btn-sm btn-danger">Borrar</button>
+								</form>
 							</td>
 						</tr>
 					{% endfor %}
