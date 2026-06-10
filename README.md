@@ -88,19 +88,30 @@ Este proyecto me ha permitido practicar:
 
 ## ▶️ Cómo ejecutar el proyecto
 
+Clonar el repositorio e instalar depencias
 ```bash
 git clone <repo-url>
 cd sistema_de_tickets
 composer install
-symfony server:start
 ```
 
-No olvides configurar el .env con la base de datos
+Configurar la base de datos en el archivo .env del proyecto
 ```bash
 DATABASE_URL="mysql://user:password@127.0.0.1:3306/sistema_tickets"
 ````
 
+Crear la BD y ejecutar migraciones
 ```bash
 php bin/console doctrine:database:create
 php bin/console doctrine:migrations:migrate
 ````
+
+Iniciar el servidor
+```bash
+symfony serve
+```
+
+```md
+Una vez iniciado, accede a:
+
+http://127.0.0.1:8000
