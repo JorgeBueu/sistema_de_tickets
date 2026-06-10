@@ -93,6 +93,7 @@ git clone <repo-url>
 cd sistema_de_tickets
 composer install
 symfony server:start
+```
 
 No olvides configurar el .env con la base de datos
 DATABASE_URL="mysql://user:password@127.0.0.1:3306/sistema_tickets"
@@ -100,3 +101,4 @@ DATABASE_URL="mysql://user:password@127.0.0.1:3306/sistema_tickets"
 ```bash
 php bin/console doctrine:database:create
 php bin/console doctrine:migrations:migrate
+````
