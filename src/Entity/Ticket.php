@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\TicketStatus;
 use App\Repository\TicketRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
@@ -47,10 +48,15 @@ class Ticket
     #[ORM\JoinColumn(nullable: false)]
     private ?User $creator = null;
 
+    #[ORM\Column(enumType: TicketStatus::class)]
+    private ?TicketStatus $status = null;
+
     public function __construct()
     {
         // Cada vez que creamos un ticket se le setea la fecha y hora de creacion.
         $this->createdAt = new DateTimeImmutable();
+        // Los tickets se crean con estado abierto
+        $this->status = TicketStatus::OPEN;
     }
 
     public function getId(): ?int
@@ -96,6 +102,18 @@ class Ticket
     public function setCreator(?User $creator): static
     {
         $this->creator = $creator;
+
+        return $this;
+    }
+
+    public function getStatus(): ?TicketStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(TicketStatus $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }

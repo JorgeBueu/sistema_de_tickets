@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Ticket;
+use App\Enum\TicketStatus;
 use App\Form\TicketType;
 use App\Repository\TicketRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -146,5 +147,57 @@ final class TicketController extends AbstractController
         }
         // Redirigir después de borrar
         return $this->redirectToRoute('app_ticket_list');
+    }
+
+    #[Route('/ticket/{id}/close', name: 'app_ticket_id_close')]
+    public function close(TicketRepository $ticketRepo, int $id, EntityManagerInterface $entityManager): Response
+    {
+        // Comprobamos si el id del ticket es del usuario con sesion iniciada
+        $ticket = $ticketRepo->find($id);
+        // Comprobamos si la consulta devuelve algun ticket
+        if (!$ticket) {
+            throw $this->createNotFoundException();
+        }
+        // Comprobamos que id sea propiedad del usuario con sesion iniciada
+        if ($ticket->getCreator() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        try {
+            $ticket->setStatus(TicketStatus::CLOSED);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Ticket cerrado con éxito');
+        } catch (Exception $e) {
+            $this->addFlash('danger', 'No se pudo modificar el estado del ticket');
+        }
+        // Redirigir después de borrar
+        return $this->redirectToRoute('app_ticket_id', ['id' => $ticket->getId()]);
+    }
+
+    #[Route('/ticket/{id}/reopen', name: 'app_ticket_id_reopen')]
+    public function reopen(TicketRepository $ticketRepo, int $id, EntityManagerInterface $entityManager): Response
+    {
+        // Comprobamos si el id del ticket es del usuario con sesion iniciada
+        $ticket = $ticketRepo->find($id);
+        // Comprobamos si la consulta devuelve algun ticket
+        if (!$ticket) {
+            throw $this->createNotFoundException();
+        }
+        // Comprobamos que id sea propiedad del usuario con sesion iniciada
+        if ($ticket->getCreator() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        try {
+            $ticket->setStatus(TicketStatus::OPEN);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Ticket reabierto con éxito');
+        } catch (Exception $e) {
+            $this->addFlash('danger', 'No se pudo modificar el estado del ticket');
+        }
+        // Redirigir después de borrar
+        return $this->redirectToRoute('app_ticket_id', ['id' => $ticket->getId()]);
     }
 }
