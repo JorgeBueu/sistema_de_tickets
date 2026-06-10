@@ -96,7 +96,9 @@ symfony server:start
 ```
 
 No olvides configurar el .env con la base de datos
+```bash
 DATABASE_URL="mysql://user:password@127.0.0.1:3306/sistema_tickets"
+````
 
 ```bash
 php bin/console doctrine:database:create
