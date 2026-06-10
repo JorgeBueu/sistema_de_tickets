@@ -111,7 +111,7 @@ Iniciar el servidor
 symfony serve
 ```
 
+Una vez iniciado, acceder a:
 ```md
-Una vez iniciado, accede a:
-
 http://127.0.0.1:8000
+```
