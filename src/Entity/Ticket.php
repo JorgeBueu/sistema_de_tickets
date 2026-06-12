@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Enum\TicketStatus;
 use App\Repository\TicketRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -51,12 +53,19 @@ class Ticket
     #[ORM\Column(enumType: TicketStatus::class)]
     private ?TicketStatus $status = null;
 
+    /**
+     * @var Collection<int, Comment>
+     */
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'ticket')]
+    private Collection $comments;
+
     public function __construct()
     {
         // Cada vez que creamos un ticket se le setea la fecha y hora de creacion.
         $this->createdAt = new DateTimeImmutable();
         // Los tickets se crean con estado abierto
         $this->status = TicketStatus::OPEN;
+        $this->comments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -114,6 +123,36 @@ class Ticket
     public function setStatus(TicketStatus $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setTicket($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getTicket() === $this) {
+                $comment->setTicket(null);
+            }
+        }
 
         return $this;
     }
