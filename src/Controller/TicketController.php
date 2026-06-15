@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Comment;
 use App\Entity\Ticket;
 use App\Enum\TicketStatus;
+use App\Form\CommentType;
 use App\Form\TicketType;
 use App\Repository\TicketRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -76,8 +78,15 @@ final class TicketController extends AbstractController
         }
         // Para que cada user solo pueda acceder a sus tickets
 
+        $comment = new Comment();
+        $form = $this->createForm(CommentType::class, $comment);
+
+        $comments = $ticket->getComments();
+
         return $this->render('ticket/show.html.twig', [
-            'ticket' => $ticket
+            'ticket' => $ticket,
+            'commentForm' => $form->createView(),
+            'comments' => $comments
         ]);
     }
 
@@ -198,6 +207,27 @@ final class TicketController extends AbstractController
             $this->addFlash('danger', 'No se pudo modificar el estado del ticket');
         }
         // Redirigir después de borrar
+        return $this->redirectToRoute('app_ticket_id', ['id' => $ticket->getId()]);
+    }
+
+    #[Route('/ticket/{id}/comment', name: 'app_ticket_comment', methods: ['POST'])]
+    public function addComment(Request $request, EntityManagerInterface $entityManager, Ticket $ticket): Response
+    {
+        $comment = new Comment();
+        $form = $this->createForm(CommentType::class, $comment);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $comment->setAuthor($this->getUser());
+            $comment->setTicket($ticket);
+
+            $entityManager->persist($comment);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Comentario creado con éxito');
+        }
+
         return $this->redirectToRoute('app_ticket_id', ['id' => $ticket->getId()]);
     }
 }

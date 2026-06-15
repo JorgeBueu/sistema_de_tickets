@@ -5,47 +5,118 @@
 
 {% block body %}
 
-	<h1>Información del ticket</h1>
+	<div>
 
-	<table class="table table-striped table-bordered">
-		<tr>
-			<th>Título</th>
-			<td>{{ticket.title}}</td>
-		</tr>
-		<tr>
-			<th>Descripción</th>
-			<td>{{ticket.description}}</td>
-		</tr>
-		<tr>
-			<th>Estado</th>
-			<td>{{ticket.status.value}}</td>
-		</tr>
-		<tr>
-			<th>Fecha creación</th>
-			<td>{{ticket.createdAt|date('d/m/Y H:i', 'Europe/Madrid')}}</td>
-		</tr>
-		<tr>
-			<th>Creador</th>
-			<td>{{ticket.creator.email}}</td>
-		</tr>
-	</table>
+		<h2 class="mb-3">Información del ticket</h2>
 
-	<a class="btn btn-primary" href="{{ path('app_ticket_list') }}">Volver</a>
-	{% if ticket.status is same as (constant('App\\Enum\\TicketStatus::OPEN')) %}
-		<a class="btn btn-success" href="{{ path('app_ticket_id_close', {'id': ticket.id}) }}">Cerrar</a>
-	{% else %}
-		<a class="btn btn-success" href="{{ path('app_ticket_id_reopen', {'id': ticket.id}) }}">Reabrir</a>
-	{% endif %}
-	<a class="btn btn-warning" href="{{ path('app_ticket_id_edit', {'id': ticket.id}) }}">Editar</a>
-	<form method="post" action="{{ path('app_ticket_id_delete', {'id': ticket.id}) }}" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que quieres borrar este ticket?');">
-		<input
-		type="hidden" name="_token" value="{{ csrf_token('delete' ~ ticket.id) }}">
-		{#
-			Token CSRF.
-			Symfony genera un token único para esta operación de borrado.
-			Así evitamos que otras webs puedan enviar peticiones POST
-			haciéndose pasar por el usuario autenticado.
-		#}
-		<button type="submit" class="btn btn-danger">Borrar</button>
-	</form>
+
+		<table class="table table-striped table-bordered mb-0">
+			<tr>
+				<th>Título</th>
+				<td>{{ ticket.title }}</td>
+			</tr>
+			<tr>
+				<th>Descripción</th>
+				<td>{{ ticket.description }}</td>
+			</tr>
+			<tr>
+				<th>Estado</th>
+				<td>{{ ticket.status.value }}</td>
+			</tr>
+			<tr>
+				<th>Fecha creación</th>
+				<td>{{ ticket.createdAt|date('d/m/Y H:i', 'Europe/Madrid') }}</td>
+			</tr>
+			<tr>
+				<th>Creador</th>
+				<td>{{ ticket.creator.email }}</td>
+			</tr>
+		</table>
+
+
+		<div class="mb-4 mt-2 d-flex gap-2 flex-wrap">
+			<a class="btn btn-primary" href="{{ path('app_ticket_list') }}">Volver</a>
+
+			{% if ticket.status is same as (constant('App\\Enum\\TicketStatus::OPEN')) %}
+				<a class="btn btn-success" href="{{ path('app_ticket_id_close', {'id': ticket.id}) }}">Cerrar</a>
+				<a class="btn btn-warning" href="{{ path('app_ticket_id_edit', {'id': ticket.id}) }}">Editar</a>
+			{% else %}
+				<a class="btn btn-success" href="{{ path('app_ticket_id_reopen', {'id': ticket.id}) }}">Reabrir</a>
+			{% endif %}
+
+			<form method="post" action="{{ path('app_ticket_id_delete', {'id': ticket.id}) }}" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres borrar este ticket?');">
+
+				<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ticket.id) }}">
+				<button type="submit" class="btn btn-danger">Borrar</button>
+			</form>
+		</div>
+
+		<hr>
+
+		<h3 class="mb-3">Comentarios</h3>
+
+		{% if comments is empty %}
+			<div class="alert alert-info">
+				Todavía no hay comentarios.
+			</div>
+		{% else %}
+			<div class="mb-4">
+				{% for comment in comments %}
+					<div class="card mb-2">
+						<div class="card-body">
+
+							<div class="d-flex justify-content-between">
+								<strong>{{ comment.author.email }}</strong>
+								<small class="text-muted">
+									{{ comment.createdAt|date('d/m/Y H:i', 'Europe/Madrid') }}
+								</small>
+							</div>
+
+							<hr>
+
+							<p class="mb-0" style="white-space: pre-line;">
+								{{ comment.content|e }}
+							</p>
+
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+		{% endif %}
+
+		
+
+		{% if ticket.status is same as (constant('App\\Enum\\TicketStatus::OPEN')) %}
+			<hr class="my-4">
+
+			<h3 class="mb-3">Añadir comentario</h3>
+
+			<div class="card">
+				<div class="card-body">
+
+					{{ form_start(commentForm, { action: path('app_ticket_comment', {id: ticket.id}) }) }}
+
+					<div class="mb-3">
+						{{ form_label(commentForm.content, 'Escribe tu comentario') }}
+						{{ form_widget(commentForm.content, {
+					'attr': {
+						'class': 'form-control',
+						'rows': 3
+					}
+				}) }}
+						{{ form_errors(commentForm.content) }}
+					</div>
+
+					<button class="btn btn-primary">
+						Enviar
+					</button>
+
+					{{ form_end(commentForm) }}
+
+				</div>
+			</div>
+		{% endif %}
+
+	</div>
+
 {% endblock %}
