@@ -7,6 +7,7 @@ use App\Entity\Ticket;
 use App\Enum\TicketStatus;
 use App\Form\CommentType;
 use App\Form\TicketType;
+use App\Repository\CommentRepository;
 use App\Repository\TicketRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -228,6 +229,43 @@ final class TicketController extends AbstractController
             $this->addFlash('success', 'Comentario creado con éxito');
         }
 
+        return $this->redirectToRoute('app_ticket_id', ['id' => $ticket->getId()]);
+    }
+
+    #[Route('/ticket/{id}/delete/comment', name: 'app_ticket_delete_comment', methods: ['POST'])]
+    public function deleteComment(Request $request, CommentRepository $commentRepository, int $id, EntityManagerInterface $entityManager): Response
+    {
+        $comment = $commentRepository->find($id);
+        // Comprobamos si la consulta devuelve algun ticket
+        if (!$comment) {
+            throw $this->createNotFoundException();
+        }
+        // Comprobamos que id sea propiedad del usuario con sesion iniciada
+        if ($comment->getAuthor() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+        /* Comprobamos que el token CSRF enviado por el formulario es válido.
+        Esto evita ataques donde otra web intenta enviar peticiones POST
+        aprovechando que el usuario tiene una sesión iniciada. */
+        if (!$this->isCsrfTokenValid(
+            'delete' . $comment->getId(),
+            $request->request->get('_token')
+        )) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $ticket = $comment->getTicket();
+
+        try {
+            $entityManager->remove($comment);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Comentario eliminado con éxito');
+        } catch (Exception $e) {
+            $this->addFlash('danger', 'No se pudo eliminar el comentario');
+        }
+
+        // Redirigir después de borrar
         return $this->redirectToRoute('app_ticket_id', ['id' => $ticket->getId()]);
     }
 }

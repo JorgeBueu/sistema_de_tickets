@@ -69,6 +69,10 @@
 								<strong>{{ comment.author.email }}</strong>
 								<small class="text-muted">
 									{{ comment.createdAt|date('d/m/Y H:i', 'Europe/Madrid') }}
+									<form method="post" action="{{ path('app_ticket_delete_comment', {'id': comment.id}) }}" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres borrar este comentario?');">
+										<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+										<button type="submit" class="btn btn-sm btn-secondary">Borrar</button>
+									</form>
 								</small>
 							</div>
 
@@ -84,7 +88,6 @@
 			</div>
 		{% endif %}
 
-		
 
 		{% if ticket.status is same as (constant('App\\Enum\\TicketStatus::OPEN')) %}
 			<hr class="my-4">
